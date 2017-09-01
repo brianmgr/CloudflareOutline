@@ -1,0 +1,44 @@
+Cloudflare Report,,,,,,,,
+,,,,,,,,
+Organization Name,,Top Threat Locations,,,,Number of Zones,Bandwidth,Threat Count
+Example Organization 1,,1. US - 20,,,Total,6,13.0MB,23
+,,2. DE - 2,,,Free,5,1.7MB,9
+Nameservers,,3. NL - 1,,,Pro,0,0.0B,0
+john.ns.cloudflare.com,,4. N/A,,,Biz,0,0.0B,0
+susan.ns.cloudflare.com,,5. N/A,,,Ent,1,11.3MB,14
+,,,,,,,,
+,Domain,Top Threat Location,Plan Type,Bandwidth,Threat Count,WAF Status,OWASP Status,Firewall Status
+,example.com,N/A,Enterprise Website,158.6KB,0,on,off - challenge,medium
+,example2.com,US,Enterprise Website,11.3MB,14,on,on - challenge,medium
+,example3.com,US,Enterprise Website,1.0MB,6,on,off - challenge,medium
+,example4.com,N/A,Enterprise Website,178.7KB,0,on,on - challenge,medium
+,example5.com,N/A,Enterprise Website,153.9KB,0,on,off - challenge,medium
+,example6.com,DE,Free Website,221.2KB,3,off,off,medium
+,,,,,,,,
+,,,,,,,,
+,,,,,,,,
+,,,,,,,,
+,,,,,,,,
+,,,,,,,,
+Organization Name,,Top Threat Locations,,,,Number of Zones,Bandwidth,Threat Count
+Example Organization 2,,1. N/A,,,Total,0,0.0B,0
+,,2. N/A,,,Free,0,0.0B,0
+Nameservers,,3. N/A,,,Pro,0,0.0B,0
+No Domains,,4. N/A,,,Biz,0,0.0B,0
+,,5. N/A,,,Ent,0,0.0B,0
+,,,,,,,,
+,,,,,,,,
+,,,,,,,,
+,,,,,,,,
+,,,,,,,,
+,,,,,,,,
+,,,,,,,,
+Organization Name,,Top Threat Locations,,,,Number of Zones,Bandwidth,Threat Count
+Example Organization 3,,1. US - 10,,,Total,1,379.8MB,10
+,,2. N/A,,,Free,0,0.0B,0
+Nameservers,,3. N/A,,,Pro,0,0.0B,0
+tanya.ns.cloudflare.com,,4. N/A,,,Biz,0,0.0B,0
+lee.ns.cloudflare.com,,5. N/A,,,Ent,1,379.8MB,10
+,,,,,,,,
+,Domain,Top Threat Location,Plan Type,Bandwidth,Threat Count,WAF Status,OWASP Status,Firewall Status
+,example7.com,US,Enterprise Website,379.8MB,10,on,on - simulate,medium
