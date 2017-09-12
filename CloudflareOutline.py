@@ -237,7 +237,6 @@ for zone in zonesData:
     # Insert zones into DB
     zoneInsert(zoneResults)
 
-print('hi')
 # Write Data to CSV
 orgCursor = db.cursor()
 zoneCursor = db.cursor()
