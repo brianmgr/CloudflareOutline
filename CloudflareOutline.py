@@ -1,4 +1,5 @@
 import os
+import sys
 import re
 import csv
 import json
@@ -81,6 +82,9 @@ def zoneAnalytics( zone ):
     else:
         zoneAnalytics = apiSession.get("%s/zones/%s/analytics/dashboard" % (cfApi, zoneID))
 
+    if not zoneAnalytics.ok:
+        sys.exit(zoneAnalytics.content)
+
     analyticsJson = json.loads(zoneAnalytics.content)['result']['totals']
     totalBandwidth = analyticsJson['bandwidth']['all']
     totalThreats = analyticsJson['threats']['all']
@@ -152,52 +156,60 @@ def zoneInsert( zone ):
     db.commit()
 
 # Get org data
-orgsPages = allOrgs()['result_info']['total_pages']
-orgsPage = 0
-while orgsPage != orgsPages:
-    orgsPage += 1
-    apiSession.params.update({"page": str(orgsPage)})
-    orgsJson = allOrgs()
-    for result in orgsJson['result']:
-        results = [
-            result['id'],
-            result['name']
-        ]
-		#TO-DO - add removal of SELF user org
-        orgsData.insert(0, results)
-        orgsData = sorted(orgsData, key=itemgetter(0))
+allOrgsRes = allOrgs()
+if 'result_info' in allOrgsRes:
+    orgsPages = allOrgsRes['result_info']['total_pages']
+    orgsPage = 0
+    while orgsPage != orgsPages:
+        orgsPage += 1
+        apiSession.params.update({"page": str(orgsPage)})
+        orgsJson = allOrgs()
+        for result in orgsJson['result']:
+            results = [
+                result['id'],
+                result['name']
+            ]
+                    #TO-DO - add removal of SELF user org
+            orgsData.insert(0, results)
+            orgsData = sorted(orgsData, key=itemgetter(0))
 
-# Insert Orgs into DB
-for org in orgsData:
-	if org[1] != 'SELF':
-		orgInsert(org)
+    # Insert Orgs into DB
+    for org in orgsData:
+            if org[1] != 'SELF':
+                    orgInsert(org)
+else:
+    sys.exit(allOrgsRes)
 
 # Get zone data
-zonesPages = allZones()['result_info']['total_pages']
-zonesPage = 0
-while zonesPage != zonesPages:
-    zonesPage += 1
-    apiSession.params.update({"page": str(zonesPage)})
+allZonesRes = allZones()
+if 'result_info' in allZonesRes:
+    zonesPages = allZonesRes['result_info']['total_pages']
+    zonesPage = 0
+    while zonesPage != zonesPages:
+        zonesPage += 1
+        apiSession.params.update({"page": str(zonesPage)})
 
-    zonesJson = allZones()
-    for result in zonesJson['result']:
-        try:
-            ns1 = result['name_servers'][0]
-            ns2 = result['name_servers'][1]
-        except KeyError:
-            ns1 = 'CNAME Setup'
-            ns2 = ''
-        results = [
-            result['owner']['id'],
-            result['name'],
-            result['owner']['name'],
-            result['plan']['name'],
-            result['id'],
-            ns1,
-            ns2
-        ]
-        zonesData.insert(0, results)
-        zonesData = sorted(zonesData, key=itemgetter(0))
+        zonesJson = allZones()
+        for result in zonesJson['result']:
+            try:
+                ns1 = result['name_servers'][0]
+                ns2 = result['name_servers'][1]
+            except KeyError:
+                ns1 = 'CNAME Setup'
+                ns2 = ''
+            results = [
+                result['owner']['id'],
+                result['name'],
+                result['owner']['name'],
+                result['plan']['name'],
+                result['id'],
+                ns1,
+                ns2
+            ]
+            zonesData.insert(0, results)
+            zonesData = sorted(zonesData, key=itemgetter(0))
+else:
+    sys.exit(allZonesRes)
 
 # Reset page param for future API calls
 apiSession.params.update({"page": "1"})
@@ -225,6 +237,7 @@ for zone in zonesData:
     # Insert zones into DB
     zoneInsert(zoneResults)
 
+print('hi')
 # Write Data to CSV
 orgCursor = db.cursor()
 zoneCursor = db.cursor()
