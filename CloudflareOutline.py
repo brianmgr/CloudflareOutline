@@ -79,12 +79,10 @@ def allZones():
 # GET zone analytics
 def zoneAnalytics( zone ):
     zoneID = zone[4]
-    print since
     #Get analytics and parse them
     if args.since and args.until:
         zoneAnalytics = apiSession.get("%s/zones/%s/analytics/dashboard?since=%s&until=%s" % (cfApi, zoneID,since,until))
     elif since and not args.since or not args.until:
-        print('hi')
         zoneAnalytics = apiSession.get("%s/zones/%s/analytics/dashboard?since=%s" % (cfApi, zoneID,since))
     else:
         zoneAnalytics = apiSession.get("%s/zones/%s/analytics/dashboard" % (cfApi, zoneID))
