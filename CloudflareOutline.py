@@ -1,4 +1,5 @@
 import os
+import sys
 import re
 import csv
 import json
@@ -37,6 +38,9 @@ if args.key:
 	key = args.key
 else:
     key = getpass.getpass('API Key:')
+
+# Default since is 1 day
+since = '-43200'
 if args.since:
 	timeRegex(args.since)
 	since = args.since
@@ -78,8 +82,13 @@ def zoneAnalytics( zone ):
     #Get analytics and parse them
     if args.since and args.until:
         zoneAnalytics = apiSession.get("%s/zones/%s/analytics/dashboard?since=%s&until=%s" % (cfApi, zoneID,since,until))
+    elif since and not args.since or not args.until:
+        zoneAnalytics = apiSession.get("%s/zones/%s/analytics/dashboard?since=%s" % (cfApi, zoneID,since))
     else:
         zoneAnalytics = apiSession.get("%s/zones/%s/analytics/dashboard" % (cfApi, zoneID))
+
+    if not zoneAnalytics.ok:
+        sys.exit(zoneAnalytics.content)
 
     analyticsJson = json.loads(zoneAnalytics.content)['result']['totals']
     totalBandwidth = analyticsJson['bandwidth']['all']
@@ -152,52 +161,60 @@ def zoneInsert( zone ):
     db.commit()
 
 # Get org data
-orgsPages = allOrgs()['result_info']['total_pages']
-orgsPage = 0
-while orgsPage != orgsPages:
-    orgsPage += 1
-    apiSession.params.update({"page": str(orgsPage)})
-    orgsJson = allOrgs()
-    for result in orgsJson['result']:
-        results = [
-            result['id'],
-            result['name']
-        ]
-		#TO-DO - add removal of SELF user org
-        orgsData.insert(0, results)
-        orgsData = sorted(orgsData, key=itemgetter(0))
+allOrgsRes = allOrgs()
+if 'result_info' in allOrgsRes:
+    orgsPages = allOrgsRes['result_info']['total_pages']
+    orgsPage = 0
+    while orgsPage != orgsPages:
+        orgsPage += 1
+        apiSession.params.update({"page": str(orgsPage)})
+        orgsJson = allOrgs()
+        for result in orgsJson['result']:
+            results = [
+                result['id'],
+                result['name']
+            ]
+                    #TO-DO - add removal of SELF user org
+            orgsData.insert(0, results)
+            orgsData = sorted(orgsData, key=itemgetter(0))
 
-# Insert Orgs into DB
-for org in orgsData:
-	if org[1] != 'SELF':
-		orgInsert(org)
+    # Insert Orgs into DB
+    for org in orgsData:
+            if org[1] != 'SELF':
+                    orgInsert(org)
+else:
+    sys.exit(allOrgsRes)
 
 # Get zone data
-zonesPages = allZones()['result_info']['total_pages']
-zonesPage = 0
-while zonesPage != zonesPages:
-    zonesPage += 1
-    apiSession.params.update({"page": str(zonesPage)})
+allZonesRes = allZones()
+if 'result_info' in allZonesRes:
+    zonesPages = allZonesRes['result_info']['total_pages']
+    zonesPage = 0
+    while zonesPage != zonesPages:
+        zonesPage += 1
+        apiSession.params.update({"page": str(zonesPage)})
 
-    zonesJson = allZones()
-    for result in zonesJson['result']:
-        try:
-            ns1 = result['name_servers'][0]
-            ns2 = result['name_servers'][1]
-        except KeyError:
-            ns1 = 'CNAME Setup'
-            ns2 = ''
-        results = [
-            result['owner']['id'],
-            result['name'],
-            result['owner']['name'],
-            result['plan']['name'],
-            result['id'],
-            ns1,
-            ns2
-        ]
-        zonesData.insert(0, results)
-        zonesData = sorted(zonesData, key=itemgetter(0))
+        zonesJson = allZones()
+        for result in zonesJson['result']:
+            try:
+                ns1 = result['name_servers'][0]
+                ns2 = result['name_servers'][1]
+            except KeyError:
+                ns1 = 'CNAME Setup'
+                ns2 = ''
+            results = [
+                result['owner']['id'],
+                result['name'],
+                result['owner']['name'],
+                result['plan']['name'],
+                result['id'],
+                ns1,
+                ns2
+            ]
+            zonesData.insert(0, results)
+            zonesData = sorted(zonesData, key=itemgetter(0))
+else:
+    sys.exit(allZonesRes)
 
 # Reset page param for future API calls
 apiSession.params.update({"page": "1"})
