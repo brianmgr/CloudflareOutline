@@ -68,4 +68,6 @@ You can also add flags to the command to better fit your needs:
 ---
 
 ## License
-BSD 3-Clause licensed. Please see the LICENSE file for details.
+BSD 3-Clause licensed.
+
+Please see the [LICENSE](LICENSE) file for details.
