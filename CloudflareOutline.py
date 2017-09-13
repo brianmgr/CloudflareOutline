@@ -121,6 +121,11 @@ def zoneDetails( zone ):
     securityLevel = apiSession.get("%s/zones/%s/settings/security_level" % (cfApi, zoneID))
     securityLevel = json.loads(securityLevel.content)['result']['value']
 
+
+    # Get SSL Setting: https://api.cloudflare.com/#zone-settings-get-ssl-setting
+    sslStatus = apiSession.get("%s/zones/%s/settings/ssl" % (cfApi, zoneID))
+    sslStatus = json.loads(sslStatus.content)['result']['value']
+
     if 'Free' in str(zone):
             owaspSensitivity = 'N/A'
             owaspMode = 'N/A'
@@ -134,7 +139,7 @@ def zoneDetails( zone ):
                 owaspMode = package['action_mode']
 
     # Add all to list and return
-    detailsResults = [wafStatus,securityLevel,owaspSensitivity,owaspMode]
+    detailsResults = [wafStatus,securityLevel,owaspSensitivity,owaspMode,sslStatus]
     return detailsResults
 
 # SQLite Org Entry
@@ -153,11 +158,11 @@ def threatsInsert( threatsByCC ):
 def zoneInsert( zone ):
     cursor.execute('''CREATE TABLE IF NOT EXISTS zones(id INTEGER PRIMARY KEY, orgID TEXT, zoneName TEXT, orgName TEXT,
         planType TEXT, zoneID TEXT, ns1 TEXT, ns2 TEXT, totalBandwidth TEXT, totalThreats TEXT,
-        topcountryThreat TEXT, wafStatus TEXT, securityLevel TEXT, owaspSensitivity TEXT, owaspMode TEXT)
+        topcountryThreat TEXT, wafStatus TEXT, securityLevel TEXT, owaspSensitivity TEXT, owaspMode TEXT, sslStatus TEXT)
     ''')
     cursor.execute('''INSERT INTO zones(orgID, zoneName, orgName, planType, zoneID, ns1, ns2, totalBandwidth,
-        totalThreats, topcountryThreat, wafStatus, securityLevel, owaspSensitivity, owaspMode)
-        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)''', (zone[0],zone[1],zone[2],zone[3],zone[4],zone[5],zone[6],zone[7],zone[8],zone[9],zone[10],zone[11],zone[12],zone[13]))
+        totalThreats, topcountryThreat, wafStatus, securityLevel, owaspSensitivity, owaspMode, sslStatus)
+        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)''', (zone[0],zone[1],zone[2],zone[3],zone[4],zone[5],zone[6],zone[7],zone[8],zone[9],zone[10],zone[11],zone[12],zone[13],zone[14]))
     db.commit()
 
 # Get org data
@@ -237,8 +242,9 @@ for zone in zonesData:
                     detailsResults[0],
                     detailsResults[1],
                     detailsResults[2],
-                    detailsResults[3]
-                ]
+                    detailsResults[3],
+                    detailsResults[4],
+    ]
     # Insert zones into DB
     zoneInsert(zoneResults)
 
@@ -436,7 +442,7 @@ for org in orgCursor:
     # Domain level information gathering.
     zonedetailCursor.execute("SELECT * FROM zones WHERE orgID=?", (orgID,))
     if zonesTotal != '0':
-        zoneHeader = ['','Domain','Top Threat Location','Plan Type','Bandwidth','Threat Count','WAF Status','OWASP Status','Firewall Status']
+        zoneHeader = ['','Domain','Top Threat Location','Plan Type','Bandwidth','Threat Count','WAF Status','OWASP Status','Firewall Status', 'SSL Status']
         if not args.noheaders:
             csvWriter(zoneHeader)
         for zone in zonedetailCursor:
@@ -454,6 +460,7 @@ for org in orgCursor:
             securityLevel = zone[12]
             owaspSensitivity = zone[13]
             owaspMode = zone[14]
+            sslStatus = zone[15]
             if planType == 'Free Website':
                 owaspStatus = 'off'
             else:    
@@ -461,7 +468,7 @@ for org in orgCursor:
 
 
             # Write domain level data to CSV
-            domainData = ['',zoneName,topcountryThreat,planType,bandwidth,totalThreats,wafStatus,owaspStatus,securityLevel]
+            domainData = ['',zoneName,topcountryThreat,planType,bandwidth,totalThreats,wafStatus,owaspStatus,securityLevel,sslStatus]
             csvWriter(domainData)
     for x in range(6):
         csvWriter('')
