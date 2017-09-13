@@ -44,6 +44,7 @@ Flag | Effect
 `-until` |  End of report timeframe (YYYY-MM-DDT00:00:00Z)*
 
 *The Since and Until flags may alter the resolution at which you recieve your analytics results. More information can be found in the [API documentation](https://api.cloudflare.com/#zone-analytics-dashboard).
+If Since and Until flags are not provided, a default timeframe of the last 12 hours will be used.
 
 ---
 
@@ -63,3 +64,8 @@ You can also add flags to the command to better fit your needs:
 ```
  python CloudflareOutline.py -email email@domain.com -key XXXXXXX -since 2017-07-01T00:00:00Z -until 2017-08-01T00:00:00Z -dbpersist
 ```
+
+---
+
+## License
+BSD 3-Clause licensed. Please see the LICENSE file for details.

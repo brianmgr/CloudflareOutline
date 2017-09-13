@@ -39,7 +39,7 @@ if args.key:
 else:
     key = getpass.getpass('API Key:')
 
-# Default since is 1 day
+# Default Since set to 12 hours
 since = '-43200'
 if args.since:
 	timeRegex(args.since)
